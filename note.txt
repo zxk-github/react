@@ -1,0 +1,696 @@
+react 官方脚手架 create-react-app
+create-react-app 
+
+2-3 
+yarn.lock 
+限制项目依赖安装包版本号
+
+src 
+    index.js是整个项目执行的入口文件
+    app.js 负责页面显示的内容
+    index.css 放一些全局样式
+
+
+react vue angular设计理练是all in js
+
+PWA  progressive web application  serviceWorker
+通过写网页的形式写一些app应用
+写了一个网页，把网页上传到一台支持https协议的服务器上，这个网页就具备了一种特性，第一次访问时候需要联网，第二次页面断网了，用户也依然可以看到之前访问到的那个页面
+
+2-4 
+页面拆分成很多组件之后，一个页面很复杂，难编写，但是当我们把它拆成一个个小组件的时候，我们再来维护这些小组件就很简单了，这就是前端组件化的概念
+app.js就是一个简单的react组件 
+
+当一个类继承了React.Component类的时候，他就是一个react组件
+import React, { Component } from 'react';
+class App extends React.Component {
+    render() {
+        return (
+            <div>
+                hello word
+            </div>
+        )
+    }
+}
+export default App;
+
+render 需要返回一个内容，组件是页面的一部分，这部分显示的东西是render函数返回的东西决定的，render返回什么，显示什么
+
+ReactDOM是一个第三方模块，有一个render方法，这个方法可以帮助我们把某一个组件挂载到某个dom节点上
+ReactDOM.render(<App />, document.getElementById('root'));
+
+在使用App组件的时候，使用的是<App />这种形式的语法，这其实是一种jsx语法，如果在react项目中使用了jsx语法，就必须要在对应的文件中引入react,否则jsx语法编译不通过
+
+render函数中的标签也是jsx语法，通过react对jsx语法进行编译识别，这样写的jsx才能生效
+
+2-5 jsx语法
+
+1. <App /> 使用app这个组件
+2. 一个组件渲染的内容是由render()函数return出去的结果决定的，在react中，在js中写的这些html标签就称为jsx语法
+jsx和js语法之间的区别就是；以前如果写普通的js,一般会返回一个字符串，在react中不需要在外部加上单引号，直接返回标签就行
+js: return `<div>aaa</div>`
+jsx: return <div>aaa</div>
+不仅可以使用html标签还可以使用自定义的组件名
+在jsx中组件名必须以大写字母开头
+
+3-1 
+组件中render函数返回的元素必须要有一个div包裹
+import {Fragment} from "react"
+Fragment: 占位符，可以让外层标签隐藏
+
+3-2 react中响应式思想和事件绑定
+使用class创建一个类的时候，constructor是优于其他函数，第一步自动被执行的，所以constructor是最先被执行的函数
+super()父类的构造函数调用一次
+react定义数据需要定义在组件的状态里面, this.state就是组件的状态
+this.state = {
+    inputValue: '123',
+    list: []
+}
+
+<input value={this.state.inputValue} />
+在jsx中，使用js的变量或者表达式，需要使用{}进行一个包裹，这时候input中的初始值就是this.state.inputValue
+在页面中这时候在input框中输入内容，输入框中内容没有发生变化，input框中的值是由state.inputValue所决定的，这个值固定写死123，所以input中的值永远都是123，只要state.inputValue不发生变化，input中显示的值就不会发生变化
+这时候事件监听input输入值的变化
+<input value={this.state.value} onChange={this.handleChange} />
+上面说过在react中想使用js的表达式，必须使用{}阔起来，同时在class的这个类中进行声明
+
+handleChange(e) {
+    console.log(e.tartge) //input 框对应的dom节点  e.target.value 能获取到当前页面中输入框的值，但是页面上没有显示出来
+    // this.state.inputValue = e.target.value; error
+    console.log(this) // undefined 为了获取组件的状态，所以this应该指向当前组件
+}
+<input value={this.state.value} onChange={this.handleChange.bind(this)} /> // 讲组件绑定到函数中
+
+在react中，如果要改变state中的值，不能直接使用this.state.inputValue = 'a' 这种直接修改的方式，react给每个组件提供了一个setState()，如果想改变state中的数据，必须使用setState()函数
+handleChange(e) {
+    this.setState({
+        inputValue: e.target.value
+    })
+}
+在程序初始化的时候，inputValue值是123, render函数执行的时候，会把input中的value内容渲染成state中inputValue中的内容，所以页面最开始显示的是123
+当在input中输入内容的时候这时候onChange方法会触发，可以通过e.target.value获取输入框中的值，
+调用组件提供的setState方法修改state中的数据，将state中inputValue修改成input中输入的内容，这时候inputValue值就发生了改变，只要inoutValue值发生了变化，对应页面中的显示也会发生变化，这时候input中输入的内容就会正常的显示出来
+
+state负责保存组件中的数据
+在jsx中如果想使用js的表达式，必须使用{}包裹
+事件绑定的函数执行的时候，在函数内部需要使用当前组件上的方法，需要绑定this
+需要改变state中的数据。不能直接修改，需要掉用组件的setState方法
+
+
+3-3
+在react中进行循环渲染的时候，需要给每一项增加一个key值，key值每一项都不同，他应该是这一项的表示符号
+
+react中有提个immutable概念
+react要求我们不能直接改变state的概念，如果需要修改那就拷贝一个副本，直接修改副本，然后赋值
+
+// react不允许就直接修state中的数据，修改数据必须使用组件当前组件提供的setState() 方法
+delete(index) {
+    this.state.list.splice(index, 1)  // error 
+}
+
+//  不推荐
+delete(index) {
+    this.state.list.splice(index, 1)
+    this.setValue({
+        list: this.state.list
+    })
+}
+
+// 推荐
+delete(index) {
+    let list = [...this.state.list];
+    list.splice(index, 1);
+    this.setValue({
+        list
+    })
+}
+
+3-4 jsx细节
+
+render()函数return出来的内容是一个jsx的语法块，Fragment本质上是一个jsx的组件，在react中，组件以大些字母开头，小些字母开头的是一个普通的元素，
+
+1. jsx注释{/* 这里是注释 */}
+
+2. react会认为元素样式的class和js中的类是同一个东西，所以在jsx建议直接使用className
+
+3. 存在标签包裹的时候
+<li dangerouslySetInnerHTML={{__html: item}}></li>
+<li>{item}</li> 
+
+4. label 在html中的作用是扩大光标点击的区域
+在react中，for会被认为是js中的for, 所以在使用到for属性的时候，使用htmlFor
+<label htmlFor="inputArea">输入</label>
+<input id="inputArea" type="text"/>
+
+3-5 组件之间传值
+
+父组件向子组件传递数据, 通过属性的形式传递
+父组件
+<todoList content={item} index={index}/>
+
+子组件在props中获取到父组件传递过来的数据
+render() {
+    return (
+        <div>{this.props.content}</div>
+    )
+}
+
+子组件通过调用父组件方法，修改父组件内容(注意修改父组建中数据的时候，注意this指向问题)
+<TodoItem content={item} index={index} deleteItem={this.delete.bind(this)} />
+
+子组件
+render() {
+    return (
+        return <div onClick={this.props.deleteItem}>{this.props.item}</div>
+    )
+}
+
+jsx实际上模版语法
+this.setState((prevState) => {
+    return {
+
+    }
+})
+
+优化:
+1. 直接在jsx中写this.deleteItem.bind(this) 会影响性能，所以一般会把this指向的修改放到constructor中
+2. jsx一般都是页面的模版，尽量不柔和了一些js逻辑在其中，所以可以单独写一个函数处理
+
+setState如果是一个函数，他就是一个异步的setState, 这时候需要现在函数外部进行一次保存
+this.setState((prevState) => ({
+    list: [...prevState.list, prevState.value],
+    value: ''
+}))
+prevState 保存的时候本次修改之前的当前的值
+
+3-7 react思考
+声名式开发和命令式开发方式
+使用jquery直接操作DOM,这种开发方式是命令式开发方式，创建一个页面，我们会通过代码高度代码，如何创建，如何添加数据，这种当时就是命令式编程，这种当时会存在大量DOM操作
+
+声名式开发
+面向数据编程，只需要构建数据，react会根据数据构建页面DOM, 可以节约到大量DOM代码
+同时可以和其他框架并存，整个项目react只会管理挂载点中的DOM.其他部分DOM和react之间没有关系，所以除了挂载点之外的DOM,可以使用其他框架处理
+
+组件化开发 
+通过继承Component，创建组件
+组件的首字母大些，普通标签首字母小些，
+组件之间通过属性向子组件传值，子组件操作父组件数据：首先需要通过属性向子组件传递一个方法，子组件通过调用方法间接的操作父组件的数据
+
+单项数据流
+父组件可以向子组件传递内容，但是子组件只能使用这个值，不能直接改变这个值，在子组件内部，父组件传递过来的数据是只读的，防止在父组件数据在一个子组件中变化了，其他使用数据的子组件也会变化
+
+是一个视图层框架
+只帮助解决数据在页面上渲染的问题，至于组件间的传值会交给别的组件来做
+
+函数式编程
+维护容易 容易自动化测试 
+
+4-1 react 调试
+
+4-2 参数校验、定义默认值
+参数校验
+import PropTypes from 'prop-types';
+TodoItem.propTypes = {
+    test: PropTypes.string.isRequired   // 字符串，并且闭传
+    content: PropTypes.string,  // 不传不会校验
+    deleteItem: PropTypes.func,
+    index: PropTypes.number,
+    content1: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    content2: PropTypes.arrayOf(PropTypes.number, PropTypes,string)
+
+}
+
+默认值
+TodoItem.defaultProps = {
+    test: 'default value'
+}
+
+4-3 props state render函数 关系
+只要state.inputValue发生变化，input中的value就会跟着变化，同时input监听了自身的onChange事件，只要向input中输入内容，onChange事件就会执行，然后在onChange执行的函数中，更新state中inputValue的值，然后页面就会跟着发生变化
+
+数据和页面直接的联动机制
+当组建的state或者props发变改变的时候，render函数就会重新执行
+页面初始化的时候，render函数会被执行一次
+之所以数据发生变化，页面就会变化，是因为页面是render函数渲染出来的，但数据state发生变化的时候，render函数就会被重新执行一次，然后渲染出state中最新的数据，所以也页面会展线最新的状态
+render() {
+    console.log('render');
+    return (
+        <div>render</div>
+    )
+}
+props中数据变化也是一个道理，props中值变化，render函数会重新执行
+当父组件render函数被运行时，他的子组件的render都会被重新运行一次，因为子组件是父组件的一部分
+
+4-4 虚拟dom
+state发生变化的时候，render函数会被重新执行一次，重新渲染一遍页面
+1. state/props 数据
+2. JSX模版
+3. render函数执行，数据 + 模版结合，生成真是DOM，显示在页面上
+4. 数据发生变化
+5. 重新执行render函数，数据 + 模版结合，生成真是DOM，显示在页面上
+
+优化
+1. state/props 数据
+2. JSX模版
+3. render函数执行，数据 + 模版结合，生成真是DOM，显示在页面上
+4. 数据发生变化
+5. 重新执行render函数，数据 + 模版结合，生成真是DOM，并不直接替换原始的DOM
+6. 新的DOM(DocumentFragment)和原始的DOM做对比，找差异
+7. 找出所有变化的部分
+8. 仅仅替换掉存在差异的部分
+
+缺陷 
+性能提升不明显
+
+1. state/props 数据
+2. JSX模版
+3. render函数执行，数据 + 模版结合 生成虚拟DOM(虚拟dom就是一个js对象，用它来描述真是DOM)
+<div id="box"><span>hello</span></div>
+['div', {id: 'box'}, ['span', {}, 'hello']]
+4. 利用虚拟DOM解构,生成真实DOM，显示在页面上
+5. 数据发生变化
+6. 生成新的虚拟DOM
+['div', {id: 'box'}, ['span', {}, 'word']]
+7. 比较原始虚拟DOM和新的虚拟DOM的区别，找出区别是span中内容
+8. 直接操作DOM，改变span中的内容
+
+react中减少了对真是DOM的创建和真是DOM的对比，取而代之的是创建的是js对象，对比的也是js对象，所以性能有了很大的提提升
+
+4-5 深入虚拟DOM 
+
+render函数中的返回值是一个模版，接着react会把模版和数据进行一个结合，生成虚拟dom。有了虚拟DOM之后才会再生成真实DOM
+render函数中的标签不是一个html标签，它实际上是一个jsx的语法，
+render() {
+    return <div></div>
+}
+
+render() {
+    return React.createElement('div', {}, 'item')
+}
+
+虚拟DOM优点
+1. 性能提升了(DOM的比对编程了js对象的比对)
+2. 它使得跨端应用得以实现， 
+
+4-6 diff算法
+当数据发生变化的时候虚拟DOM才会发生比对，改变state或者props都是数据发生了变化，props的变化归根绝地也是父组件的state发生了变化，所以只有调用setState的时候，数据才会发生变化，然后虚拟DOM才会发生比对。
+setState为了提高react性能，他是一个异步的，如何连续调动多次setState，react会把他合并成一次，然后做一次虚拟DOM比对，更新一次真是DOM
+
+同层虚拟DOM同层比对
+
+4-7 ref引用 用来帮助我们在react中直接获取DOM
+在react中ref用来操作DOM。
+在react中可以使用e.target获取到一个时间对应的DOM节点。
+
+<input ref={(input) => {this.input = input}} />
+console.log(this.input.value)
+ref等于一个箭头函数
+构建了ref的引用，这个引用叫this.input，this.input对应的就是当前input框对应的这个DOM,
+
+比如说获取列表数量，数据改变，列表变化，因为setState函数的执行是一个异步的过程，所以setState下面的代码就会在他之前执行
+所以需要在setState执行完成，再执行第二个函数
+setState(() => {
+
+}, () => {
+    // 上面回调函数执行完成之后，才会执行
+} )
+
+4-8 生命周期函数
+在某一个时刻组件会自动调用执行的函数
+当state或者props中数据变化的时候，render函数会自动执行，所以render函数本质上就是一个生命周期函数
+
+constructor 当组件创建的时候，会自动执行 但是constructor是js自带的
+
+阶段1 initialzation 初始化  constructor就算是
+初始化数据 state和props
+
+阶段2 mounting 挂载
+componentWillMount 在组件即将被挂在到页面上执行
+render  做页面挂在
+componentDidMount 组件被挂在到页面之后自动执行
+页面挂载完成之后，改变页面数据，只有render函数执行，另外两个只会执行一次
+
+阶段3 updating 组件更新 
+数据发生变化的时候，页面的更新会被执行
+也就是说要么props变化，要么state发生变化的时候才会触发更新方法的什么
+
+共有的
+shouldComponentUpdate 组件更新之前，会被执行，需要返回一个boolean值
+返回 true 组件更新
+返回 false 组件不会更新，后面的声名周期都不会执行了
+
+componentWillUpdate 组件被更新之前执行
+
+render 重新渲染DOM
+
+componentDidUpdate 更新完毕之后执行
+
+props特有的 
+componentWillReceiveProps 组件没有props传入的值，就不会执行这个函数，页面第一次渲染不会触发这个函数
+只要父组件的render函数重新执行了，子组件这个生命周期就会执行
+如果这个组件第一次存在于父组件中，不会执行
+如果这个子组件已经存在于父组件中，才会执行
+
+unMounting
+componentWillUnmount 当组件即将从页面上去除的时候执行
+
+生命周期函数是相对于组件来说的，父组件的render早于子组件update
+
+4-9 生命周期使用场景
+render函数必须定义 
+
+勾选调试工具highlight updates之后，这时候重新渲染的组件会被显示出来
+
+
+render函数执行时机
+1. 当state或者props发生变化的时候执行
+2. 当父组件render函数执行的时候，子组件render函数也会被重新执行
+
+优化2: 避免组件记性无谓的render
+shouldComponentUpdate(nextProps, nextState) {
+    if(nextProps.content !== this.props.content) {
+        return true;
+    } else {
+        return false;
+    }
+}
+nextProps 接下来props变化成什么样子
+nextState 接下啦state变化成什么样
+
+
+现在知道的性能优化
+1. 函数this的改变放在constructor中进行，保证整个程序的this绑定只需要绑定一次，而且可以避免子组件的一些无谓渲染
+constructor (props) {
+    super(props);
+    this.handle = this.handle.bind(this);
+}
+
+2.  setState是一个异步的函数，可以把多次的改变结合成一次来做，这样可以降低虚拟dom的比对频率
+setState(() => {
+
+}, () => {
+
+})
+
+3. react底层采取同层比对，key值这种模式来提升比对的性能
+
+4. 借助shouldComponentUpdate可以避免父组件render子组件render的情况
+
+react中发送ajax请求
+componentDidMount 
+componentWillMount 可能和服务端渲染或者rn冲突
+
+放在render中会存在死循环问题
+
+
+4-10 使用charles进行接口的模拟
+代理服务器，可以抓到浏览器的接口请求
+
+tools -> maplocal
+
+componentDidMount() {
+    axios.get('/api/list').then( () => {
+        this.setState( () => {
+            return {
+                list: res.data
+            }
+        })
+    } )
+}
+
+4-11 动画效果
+react-transition-group
+
+redux
+
+5-1 
+react 本身是一个非常轻量级的视图层框架
+react 仅仅只提供简单的父子组件的通信，随意如果跨级或者同级组件之间进行数据共享会非常困难
+
+所有数据都放到一个共公的存储空间store中，组件只需要改变store中对应的数据就行了，其他组件会自动感知store中数据的变化，store只要存在变化，使用store中数据的组件就会自动的从store中存储数据
+redux就是把组件中的数据放到一个公用的区域去保存
+
+redux = reducer + flux
+
+5-2 redux 工作流程
+
+ReactComponent 借书的人
+ActionCreators 我要借书这句话 
+store 图书管理员
+Reducers 记录图书的本子
+
+假设我要借本书，
+借书的人存在(ReactComponent), 
+我要借书这句话(ActionCreator);
+被图书馆的管理员听见了(store); 
+然后如数管理员回去查阅他的小手册(reducers)
+reducers将查找的位置返回给管理员
+管理员根据位置找到书，返回给借书人
+
+组件想获取组件中的数据，发出需要数据的请求(actionCreator),store接受到了想要获取数据的请求，但是store并不知道给什么样的数据，他需要向reducer发起请求，reducer会告诉store,应该给组件什么样的数据，store知道之后，把对应的数据给到组件就可以了
+
+向改变store中的数据也是同样的，通过actionCreator告诉store, 组件需要改变数据了，但是他不知道如何去改变数据，这时候会调用reducer告诉store, 应该如何去修改数据，store修改之后，会告诉组件数据修改完成，其他组件可以获取数据了
+
+
+5-4 redux 是解决数据传递的框架，他把说有数据都放在了store中进行管理，所以store是一个很重要的环节，在我们编写代码的时候，也应该首先编写store中的代码
+
+利用createStore 就能创建一个store
+
+import { createStore } from 'redux';
+
+const store = new createStore();
+
+export default store;
+
+store是一个图书馆的管理员，但是他自己本身记不住如何管理自己的图书，需要一个小册子(reducers)
+
+reducer中包括数据的操作，数据的状态，操作记录等等, 返回一个函数就行
+defaultState = {}
+export default (state = defaultState, action) => {
+    return state;
+}
+state: 当前整个store仓库中的所有数据
+action: 是描述(类型和值)
+
+import reducer from './reducer';
+const store = createStore(reducer);
+renducer传递给store，store现在就知道整个仓库中数据有多少
+
+store中保存了数据，组件获取数据
+组件中
+import store  from './store';
+constructor(super) {
+    console.log(store.getState()) 
+    this.state = store.getState();
+}
+
+store是一个图书管理员，但是他不知道自己有什么，但是小册子(reducer)会记录他有什么, 所以在创建store的时候，需要把小册子穿给他，小测试是一个函数，小册子的state参数就是当前他所具备的东西的一个记录
+后续的操作数据的数据源也都是这个state
+
+自己理解：
+store是一个人，他有多少钱他自己不知道，这时候需要一个有一个记录，这个记录小本子就是reducer，所以各种存钱，花钱都在这个本子上进行着，每次的存储都需要在原有的记录上进行
+
+5-5 改变store中的数据
+创建action 
+const action = {
+    type: 'input_change',  
+    value: e.target.value
+}
+//  action的描述 type是类型 value是值
+store.dispatch(action)
+// store.dispatch接收当前的action, 但是store不知道该咋办，store必须要拿着当前的state和action交给reducer去处理
+redux会自动的把当前的数据和action转发给reducer, reducer
+
+reducer就会结合当前数据和action作出相应的处理，返回一个新的数据给store
+reducer可以接受state但是绝对不能在原有state上进行修改，但是可以返回一个全新的state给store
+store接受到数据之后，会用新的数据替换掉老的数据
+当store发生变化的时候在组件中使用监听store的变化，执行对应的函数
+this.handleStoreChange = this.handleStoreChange.bind(this)
+store.subscribe(this.handleStoreChange)
+当store变化的时候，就会执行handleStoreChange
+
+
+5-8  使用actionCreator统一管理action 函数返回action 对象
+
+5-9
+redux原则
+1. redux使用的时候 store必须唯一
+2. 只有store能够改变自己的内容 reducer仅仅是拿到之前state的数据，根据需要返回一个新的state数据，仅仅是一个数据处理，真正的更新是store自己做的
+export default (state, action) => {
+    if(action.type === 'change') {
+        state.value = action.value 
+    }
+}
+上面这种写法是错误的，因为reducer直接修改了state中的数据
+
+export default (state, action) => {
+    if(action.type === 'change') {
+        const newState = JSON.parse(JSON.stringify(state))
+        newState.value = 'change';
+        return newState;
+    }
+}
+
+3. reducer必须是一个纯函数(不能有异步 时间 不定数据相关的操作 )
+state.value = '11' 这就是副作用
+纯函数： 给定固定的输入就会有固定的输出，并且不会有副作用
+
+createStore 创建store
+store.dispatch 派发action，传递给store
+store.getState 获取到store中所有的数据内容
+store.subscribe 方法，订阅store的改变
+
+6-1 如何拆分UI组件和容器组件
+UI组件 傻瓜组件 专门用来做渲染
+容器组件 聪明组件 用来处理逻辑
+
+6-2 无状态组件 因为它仅仅是一个函数，而原来的类继承Component的方式会存在生命周期的，所有执行效率比较低
+当一个组件只有一个render函数的时候，就可以用一个无状态组件代替
+const TodoList = (props) => {
+    return (
+        <div>{props.value}</div>
+    )
+}
+export default TodoList;
+
+6-3 数据请求
+获取到接口数据之后，保存到store中
+1. 创建action 
+export  const initListAction = (data) => ({
+        type: 'get_list',
+        data
+})
+2. 使用action 
+const action = initListAction(res.data);
+store.dispatch(action)
+
+3. reducer操作数据
+if(action.type === 'get_list') {
+    const newState = JSON.parse(JSON.stringify(state));
+    newState.list = action.data;
+    return newState;
+}
+
+6-4 redux-thunk 中间件进行ajax请求发送
+如果组件的数据请求，或者复杂的逻辑处理都放到组件中，这样会造成组件很大，所以一般将异步请求，或者复杂的数据逻辑提取出来
+redux-thunk是redux的中间件可以让我们把异步请求，或者复杂的数据逻辑放到action中处理 
+使用中间件
+store/index.js
+applyMiddleware可以让我们使用redux中间件
+import { createStore, applyMiddleware } from 'redux';
+const store = createStore {
+    reducer,
+    applyMiddleware([thunk])  // 多个插件使用数组 
+}   
+
+当存在多个中间件，还需要使用dev-tools的时候
+import { createStore, applyMiddleware, compose } from 'redux';
+import reducer from './reducer';
+import thunk from 'redux-thunk';
+
+const composeEnhancers =
+  typeof window === 'object' &&
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?   
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+      // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
+    }) : compose;
+
+ const enhancer = composeEnhancers(
+  applyMiddleware(thunk),
+  // other store enhancers if any
+);
+const store = createStore(reducer, enhancer);
+
+redux-devtools-extension
+
+
+原本actionCreator返回的是一个对象，使用redux-thunk之后，返回的可以是一个函数了
+
+获取数据 
+actionCreator  使用了redux-thunk之后，action不仅仅可以是一个对象还可以是函数
+
+export const initListAction = (data) => ({
+    type: 'init_list_action',
+    data
+})
+export const getTodoList = () => {
+    return (dispatch) => {
+        axios.get('/list.json').then( (res) => {
+            console.log(res.data);
+            const data = res.data;
+            const action = initListAction(data);
+            dispatch(action);
+        })
+    }
+}
+
+组件中使用
+componentDidMount() {
+    const action = getTodoList();
+    store.dispatch(action)
+}
+
+函数形式的action，在通过store.dispatch(action) 进行调用的时候，这个action函数就会自动执行
+
+6-5 redux中间件
+view会通过store.dispatch(action)派发一个action给store, store接受到action之后，连同之间的state一起传到reducer中，reducer返回一个全新的数据给store, store去改变自己的state
+
+redux中间件，中间指的是action和store之间
+action通过dispatch方法传递给我store，说明action和store之间是dispatch的方法
+中间件本质上是对dispatch方法的一个封装，之前只能接受对象，现在可以接受一个函数
+
+  
+6-6 redux-saga 异步代码拆分
+中间件指的是在action和store之间
+使用redux-saga之后可以有一个专门的位置写api的数据获取
+
+
+6-7 react-redux 使用
+方便我们再react中使用redux
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+
+import TodoList from './todo2/TodoList';
+import store from './store';
+const App = (
+    <Provider store={ store }>
+        <TodoList />
+    </Provider>
+)
+
+ReactDOM.render(App, document.getElementById('root'));
+
+Provider提供了一个连接器的功能，将属性store和store对象进行一个绑定，所以在Provider这个组件中的所有子组件都能直接使用store内容
+
+
+组件中
+import {connect} from 'react-redux';
+// ...
+const mapStateToProps = (state) => {
+    return {
+        inputValue: state.inputValue
+    }
+}
+const mapDispatchToProps = (dispatch) => {
+    return {
+        changeInputValue(e) {
+            const action = {
+                type: 'change_input_value',
+                value: e.target.value
+            }
+            dispatch(action);
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
+让TodoList组件和store之间进行连接, 通过connect方法，组件获取到store中的内容
+连接的规则在mapStateToProps中，store中的inputValue映射到组件props的inputValue上，所以组件中可以直接使用this.props.inputValue获取到值
+
+修改组件的规则再mapDispathToProps里进行，将store的dispatch方法挂载到props上，
+connect函数把UI组件和一些业务逻辑代码进行结合 返回的是一个容器组件
+
+
+
+
